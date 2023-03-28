@@ -1,5 +1,7 @@
 #!/bin/bash
 
+pushd $(dirname "${0}") > /dev/null
+
 k8s_cluster=mycluster
 k8s_namespace=myns
 helm_name=xm-go
