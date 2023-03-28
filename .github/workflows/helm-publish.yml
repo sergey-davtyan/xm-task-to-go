@@ -1,0 +1,40 @@
+name: Helm
+
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+on:
+  push:
+#     branches: [ "main" ]
+    # Publish semver tags as releases.
+#     tags: [ 'v*.*.*' ]
+
+env:
+  # Use docker.io for Docker Hub if empty
+  REGISTRY: ghcr.io
+  # github.repository as <account>/<repo>
+  IMAGE_NAME: ${{ github.repository }}
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Pushing Helm Chart
+        run: |
+          cd helm
+          helm package xm-go
+          # Get packed chart file name
+          REPO_OWNER=`echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]'`
+          PKG_NAME=`ls *.tgz`
+          # pushing to registry
+          helm push ${PKG_NAME} oci://ghcr.io/${REPO_OWNER}/charts
