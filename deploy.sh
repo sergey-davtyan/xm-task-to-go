@@ -3,8 +3,9 @@
 k8s_cluster=mycluster
 k8s_namespace=myns
 helm_name=xm-go
+helm_dir=helm-deploy
 
-prerequisites(){
+check_prerequisites(){
     err_message=""
     if ! command -v docker &> /dev/null
     then
@@ -14,11 +15,14 @@ prerequisites(){
     then
         err_message+="\t- kubectl\n"
     fi
+    if ! command -v helm &> /dev/null
+    then
+        err_message+="\t- helm\n"
+    fi
     if ! command -v k3d &> /dev/null
     then
         err_message+="\t- k3d\n"
     fi
-
     if [ ! -z "$err_message" ]
     then
         echo "Oh, my very dear user, in order to run this script effectively, you need to have all the requirements installed beforehand!"
@@ -54,15 +58,16 @@ k8s_cluster_cleanup(){
 
 app_deployment(){
     echo -e "\nDeployment of this application can take several minutes. So, please, be patient..."
-    helm upgrade --install -n $k8s_namespace --wait $helm_name helm/$helm_name
+    helm dependency build $helm_dir
+    helm upgrade --install -n $k8s_namespace --wait $helm_name $helm_dir
 }
 
 print_info(){
     echo "Starting to deploy $helm_name helm Chart on $k8s_cluster k8s cluster using $k8s_namespace namespace..."
-    echo "NOTE: this script has been tested with bash v3.2.57, docker v20.10.22, kubectl v1.25.4 and k3d v5.4.9"
+    echo "NOTE: this script has been tested with bash v3.2.57, docker v20.10.22, kubectl v1.25.4, helm v3.11.0 and k3d v5.4.9"
 }
 
-prerequisites
+check_prerequisites
 print_info
 k8s_cluster_preparation
 app_deployment
