@@ -3,7 +3,7 @@
 k8s_cluster=mycluster
 k8s_namespace=myns
 helm_name=xm-go
-helm_dir=helm-deploy
+helm_dir=helm
 
 check_prerequisites(){
     err_message=""
