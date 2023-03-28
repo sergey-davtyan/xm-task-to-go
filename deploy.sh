@@ -32,34 +32,32 @@ check_prerequisites(){
     fi
 }
 
-k8s_cluster_preparation(){
+create_cluster(){
     if ! k3d cluster get --no-headers $k8s_cluster &> /dev/null
     then
         k3d cluster create $k8s_cluster
     else
         echo -e "\nThere is a k8s cluster with name $k8s_cluster already running."
         while true; do
-            read -p "Do you want me to re-create it? " yn
+            read -p "Do you want me to re-create it for you? " yn
             case $yn in
-                [Yy]* ) echo "Ok, re-creating...";k8s_cluster_cleanup;sleep 1;k8s_cluster_preparation; break;;
+                [Yy]* ) echo "Ok, re-creating...";delete_cluster;sleep 1;create_cluster; break;;
                 [Nn]* ) echo "Ok, keeping..."; break;;
                 * ) echo "Please answer yes or no.";;
             esac
         done
 
     fi
-    kubectl create namespace $k8s_namespace
 }
 
-k8s_cluster_cleanup(){
-    # helm uninstall $helm_name -n $k8s_namespace &> /dev/null
+delete_cluster(){
     k3d cluster delete $k8s_cluster
 }
 
-app_deployment(){
+deploy_application(){
     echo -e "\nDeployment of this application can take several minutes. So, please, be patient..."
     helm dependency build $helm_dir
-    helm upgrade --install -n $k8s_namespace --wait $helm_name $helm_dir
+    helm upgrade --install --create-namespace -n $k8s_namespace -f $helm_dir/values.yaml --debug --wait $helm_name $helm_dir
 }
 
 print_info(){
@@ -69,5 +67,5 @@ print_info(){
 
 check_prerequisites
 print_info
-k8s_cluster_preparation
-app_deployment
+create_cluster
+deploy_application
