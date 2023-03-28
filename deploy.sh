@@ -57,7 +57,7 @@ delete_cluster(){
 deploy_application(){
     echo -e "\nDeployment of this application can take several minutes. So, please, be patient..."
     helm dependency build $helm_dir
-    helm upgrade --install --create-namespace -n $k8s_namespace -f $helm_dir/values.yaml --debug --wait $helm_name $helm_dir
+    helm upgrade --install $helm_name $helm_dir --render-subchart-notes --create-namespace -n $k8s_namespace --wait # --debug --dry-run
 }
 
 print_info(){
