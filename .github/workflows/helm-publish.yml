@@ -1,0 +1,46 @@
+name: Helm
+
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+on:
+  push:
+    branches: [ "main" ]
+
+env:
+  # Use docker.io for Docker Hub if empty
+  REGISTRY: ghcr.io
+  # github.repository as <account>/<repo>
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files in the docs folder
+        id: changed-files-specific
+        uses: tj-actions/changed-files@v35
+        with:
+          files: helm/**
+
+      - name: Pushing Helm Chart
+        if: steps.changed-files-specific.outputs.any_changed == 'true'
+        run: |
+          cd helm
+          helm package xm-go
+          REPO_OWNER=`echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]'`
+          PKG_NAME=`ls *.tgz`
+          # pushing to registry
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          helm push ${PKG_NAME} oci://ghcr.io/${REPO_OWNER}/charts
