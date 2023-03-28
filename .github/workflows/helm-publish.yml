@@ -32,12 +32,12 @@ jobs:
         id: changed-files-specific
         uses: tj-actions/changed-files@v35
         with:
-          files: helm/**
+          files: helm-charts/**
 
       - name: Pushing Helm Chart
         if: steps.changed-files-specific.outputs.any_changed == 'true'
         run: |
-          cd helm
+          cd helm-charts
           helm package xm-go
           REPO_OWNER=`echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]'`
           PKG_NAME=`ls *.tgz`
