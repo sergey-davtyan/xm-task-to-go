@@ -1,0 +1,13 @@
+replicaCount: 2
+
+fullnameOverride: "api"
+
+image:
+  repository: ghcr.io/sergey-davtyan/xm-task-to-go
+  tag: main
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 3000
+  targetPort: 8080
